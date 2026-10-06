@@ -1,4 +1,4 @@
-# 🚀 Flask CRUD API
+# Flask CRUD API
 
 A simple CRUD (Create, Read, Update, Delete) REST API built with **Flask**, **SQLAlchemy**, and **SQLite**.
 
@@ -399,6 +399,388 @@ users.db
 ```
 
 ---
+
+# Dockerizing the Flask CRUD API
+
+
+# Prerequisites
+
+Install docker
+
+```bash
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER && newgrp docker
+docker --version
+docker compose --version
+```
+
+Check if docker service is running
+```bash
+sudo systemctl status docker
+```
+
+---
+
+# Project Structure
+
+```text
+python-flask/
+├── Dockerfile
+├── app.py
+├── requirements.txt
+├── README.md
+└── instance/
+```
+
+---
+
+# Dockerfile
+
+The application uses the following Dockerfile:
+
+```dockerfile
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 5000
+
+CMD ["python", "app.py"]
+```
+
+---
+
+# Build Docker Image
+
+From the project root directory:
+
+```bash
+docker build -t python-flask:1.0 .
+```
+
+Expected output:
+
+```text
+Successfully built <image-id>
+Successfully tagged python-flask:1.0
+```
+
+Verify image:
+
+```bash
+docker images
+```
+
+Example:
+
+```text
+REPOSITORY     TAG
+python-flask   1.0
+```
+
+---
+
+# Run Container
+
+Start the container:
+
+```bash
+docker run -d \
+  --name python-flask \
+  -p 5000:5000 \
+  python-flask:1.0
+```
+
+Verify:
+
+```bash
+docker ps
+```
+
+Example:
+
+```text
+CONTAINER ID   IMAGE              PORTS
+abcd1234       python-flask:1.0   0.0.0.0:5000->5000/tcp
+```
+
+---
+
+# View Container Logs
+
+```bash
+docker logs -f python-flask
+```
+
+Expected:
+
+```text
+* Running on all addresses (0.0.0.0)
+* Running on http://127.0.0.1:5000
+```
+
+---
+
+# Test Application
+
+## Check Home Endpoint
+
+```bash
+curl http://localhost:5000
+```
+
+Response:
+
+```json
+{
+  "message": "Flask CRUD API is running",
+  "version": "1.0",
+  "endpoints": [
+    "/users",
+    "/users/<id>"
+  ]
+}
+```
+
+---
+
+## Create User
+
+```bash
+curl -X POST http://localhost:5000/users \
+-H "Content-Type: application/json" \
+-d '{
+  "name":"Prayag",
+  "email":"prayag@gmail.com"
+}'
+```
+
+Response:
+
+```json
+{
+  "message": "User created",
+  "user": {
+    "id": 1,
+    "name": "Prayag",
+    "email": "prayag@gmail.com"
+  }
+}
+```
+
+---
+
+## Get All Users
+
+```bash
+curl http://localhost:5000/users
+```
+
+Response:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Prayag",
+    "email": "prayag@gmail.com"
+  }
+]
+```
+
+---
+
+## Get User By ID
+
+```bash
+curl http://localhost:5000/users/1
+```
+
+Response:
+
+```json
+{
+  "id": 1,
+  "name": "Prayag",
+  "email": "prayag@gmail.com"
+}
+```
+
+---
+
+## Update User
+
+```bash
+curl -X PUT http://localhost:5000/users/1 \
+-H "Content-Type: application/json" \
+-d '{
+  "name":"Prayag Sangode"
+}'
+```
+
+Response:
+
+```json
+{
+  "message": "User updated",
+  "user": {
+    "id": 1,
+    "name": "Prayag Sangode",
+    "email": "prayag@gmail.com"
+  }
+}
+```
+
+---
+
+## Verify Update
+
+```bash
+curl http://localhost:5000/users/1
+```
+
+Response:
+
+```json
+{
+  "id": 1,
+  "name": "Prayag Sangode",
+  "email": "prayag@gmail.com"
+}
+```
+
+---
+
+## Delete User
+
+```bash
+curl -X DELETE http://localhost:5000/users/1
+```
+
+Response:
+
+```json
+{
+  "message": "User deleted"
+}
+```
+
+---
+
+## Verify Deletion
+
+```bash
+curl http://localhost:5000/users
+```
+
+Response:
+
+```json
+[]
+```
+
+---
+
+# Access Container Shell
+
+```bash
+docker exec -it python-flask bash
+```
+
+Inside the container:
+
+```bash
+ls -la
+```
+
+---
+
+# Stop Container
+
+```bash
+docker stop python-flask
+```
+
+---
+
+# Start Existing Container
+
+```bash
+docker start python-flask
+```
+
+---
+
+# Remove Container
+
+```bash
+docker rm -f python-flask
+```
+
+---
+
+# Remove Image
+
+```bash
+docker rmi python-flask:1.0
+```
+
+---
+
+# One-Line Build and Run
+
+```bash
+docker build -t python-flask:1.0 . && \
+docker run -d --name python-flask -p 5000:5000 python-flask:1.0
+```
+
+---
+
+# Cleanup
+
+Remove stopped containers:
+
+```bash
+docker container prune -f
+```
+
+Remove unused images:
+
+```bash
+docker image prune -f
+```
+
+---
+
+# Next Step
+
+Once the containerized application is working, the natural progression is:
+
+```text
+Flask API
+   ↓
+Docker
+   ↓
+Docker Compose
+   ↓
+PostgreSQL
+   ↓
+GitLab CI/CD
+   ↓
+Kubernetes Deployment
+   ↓
+Service
+   ↓
+Ingress
+```
+
+This will take the project from a local Docker container to a production-style Kubernetes deployment.
 
 # Next Steps
 
